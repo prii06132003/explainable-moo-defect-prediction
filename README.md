@@ -1,4 +1,4 @@
-# Explainable Multi-Objective Metaheuristic Optimization for Software Defect Prediction
+# DefectIQ — Autonomous Explainable Multi-Objective Software Defect Intelligence Platform
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40%2B-FF4B4B.svg)](https://streamlit.io/)
@@ -6,18 +6,22 @@
 [![SHAP](https://img.shields.io/badge/SHAP-Explainable%20AI-brightgreen.svg)](https://shap.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An intelligent, production-grade Software Defect Prediction (SDP) and Explainable AI (XAI) system featuring hybrid metaheuristic optimization, multi-objective feature selection (NSGA-II, GA, BPSO), leakage-free preprocessing, multi-metric classifier benchmarking, and automated developer refactoring recommendations.
+> **DefectIQ** is a state-of-the-art AI-powered research and production platform for **Explainable Multi-Objective Software Defect Prediction (SDP)**. Built with high-performance metaheuristics (NSGA-II, Binary PSO, Genetic Algorithms), leakage-free preprocessing, five classical ML classifier architectures, and game-theoretic Explainable AI (SHAP) that maps empirical metric attributions directly to concrete developer refactoring guidance.
 
 ---
 
-## 📌 Project Overview
+## 🎨 Futuristic Dark Research UI Aesthetic
 
-Software Defect Prediction (SDP) allows software quality assurance teams to proactively allocate code review and unit testing resources to fault-prone software modules before shipping code to production. 
-
-This project addresses the core challenges in traditional defect prediction:
-1. **High Dimensionality & Multicollinearity**: Software metrics (McCabe cyclomatic complexity, Halstead tokens, CK object-oriented metrics) exhibit intense inter-feature correlations and redundancy.
-2. **Multi-Objective Trade-offs**: In real-world software engineering, teams must minimize classification error while simultaneously reducing the number of required code metrics and lowering computational inference budget.
-3. **Black-Box Opacity**: Standard predictive models lack explainability. Our system leverages **SHAP (SHapley Additive exPlanations)** to explain both global feature importance and local module predictions, translating metric attributions into concrete **Software Engineering Refactoring Guidance**.
+Designed specifically for researchers and software engineering teams:
+- **Dark AI Research Palette**:
+  - Background: `#0B1020` (Dark Cosmic Navy)
+  - Sidebar: `#10172A` (Deep Slate)
+  - Cards & Panels: `#151E33` (Translucent Glassmorphism)
+  - Primary Accent: `#8B5CF6` (Electric Violet)
+  - Secondary Accent: `#38BDF8` (Cyber Sky Blue)
+  - Status Accents: `#22C55E` (Clean / Success), `#EF4444` (Defective / Critical)
+  - Borders: `#26334D`
+- **Interactive Dark Plotly Charts**: Seamlessly themed 2D/3D non-dominated Pareto surfaces, multi-metric radar spectra, ROC/PR curves, and local SHAP waterfall attributions.
 
 ---
 
@@ -37,7 +41,6 @@ This project addresses the core challenges in traditional defect prediction:
                                       | SMOTE (Train-Only)     |
                                       +-----------+------------+
                                                   |
-                                                  v
                          +------------------------------------------------+
                          |      Metaheuristic Feature Selection Lab       |
                          |  +--------------+  +------------+  +--------+  |
@@ -59,28 +62,30 @@ This project addresses the core challenges in traditional defect prediction:
         |   Explainable AI Studio |                               | Real-Time Prediction    |
         | - Global SHAP Rankings  |                               | - Single Module Scoring |
         | - Local Waterfall Plots |                               | - Batch CSV Processing  |
-        | - Refactoring Advice    |                               | - SQLite Audit Database |
+        | - Refactoring Guidance  |                               | - SQLite Audit Database |
         +-------------------------+                               +-------------------------+
 ```
 
 ---
 
-## 🔬 Multi-Objective Formulation (NSGA-II)
+## 📐 Multi-Objective Optimization Formulation (NSGA-II)
 
-The system minimizes three simultaneous conflicting objectives:
+DefectIQ optimizes three conflicting objectives simultaneously using non-dominated sorting and crowding distance:
+
 $$\min \mathbf{F}(\mathbf{x}) = \Big( f_1(\mathbf{x}),\; f_2(\mathbf{x}),\; f_3(\mathbf{x}) \Big)$$
 
-- **$f_1(\mathbf{x}) = 1.0 - \text{Metric}(\mathbf{x})$**: Predictive classification error (where $\text{Metric} \in \{\text{F1-Score}, \text{MCC}, \text{ROC-AUC}\}$).
+where $\mathbf{x} = [x_1, x_2, \dots, x_D] \in \{0, 1\}^D$ is the binary feature mask:
+- **$f_1(\mathbf{x}) = 1.0 - \text{Metric}(\mathbf{x})$**: Predictive classification error (where $\text{Metric} \in \{\text{F1-score}, \text{MCC}, \text{ROC-AUC}\}$).
 - **$f_2(\mathbf{x}) = \frac{\sum_{i=1}^D x_i}{D}$**: Ratio of selected software metrics over total metric space.
-- **$f_3(\mathbf{x}) = t_{\text{latency}}(\mathbf{x})$**: Computational inference and evaluation execution latency in seconds.
+- **$f_3(\mathbf{x}) = t_{\text{latency}}(\mathbf{x})$**: Model evaluation and inference execution latency in seconds.
 
-The **Knee-Point Solution** along the Pareto front is automatically identified using minimum Euclidean distance to the ideal objective vector $(0, 0, 0)$.
+The platform automatically computes the **Knee-Point Solution** along the Pareto front via minimum Euclidean distance to the ideal objective vector $(0, 0, 0)$.
 
 ---
 
-## 📁 Benchmark Datasets Supported
+## 📁 18 Curated Empirical Benchmark Datasets Included
 
-The repository includes curated, empirical benchmark datasets from standard software engineering repositories:
+DefectIQ includes **18 offline-ready, genuine academic defect datasets**:
 
 1. **PROMISE Suite (NASA Metrics Data Program)**:
    - `PC1`, `PC3`, `PC4` (NASA spacecraft and flight instrument software)
@@ -89,9 +94,9 @@ The repository includes curated, empirical benchmark datasets from standard soft
    - `MW1` (Zero-gravity microgravity combustion experiments)
    - `MC2` (Video guidance system)
 2. **AEEEM Suite (D'Ambros et al.)**:
-   - `EQ` (Eclipse Equinox OSGi framework)
+   - `EQ` (Eclipse Equinox OSGi runtime framework)
    - `JDT` (Eclipse Java Development Tools)
-   - `LC` (Apache Lucene information retrieval library)
+   - `LC` (Apache Lucene search library)
    - `ML` (Eclipse Mylyn task-focused interface)
    - `PDE` (Eclipse Plugin Development Environment)
 3. **ReLink Suite (Defect-Corrected Metrics)**:
@@ -100,74 +105,70 @@ The repository includes curated, empirical benchmark datasets from standard soft
    - `zxing` (1D/2D barcode image processing library)
 4. **MORPH Suite (Turhan et al. / SOFTLAB)**:
    - `ar1`, `ar3`, `ar4`, `ar5`, `ar6` (Embedded software and telecommunications controllers)
-5. **Custom CSV Support**: Upload any software metric CSV with automatic target defect column detection.
+5. **Custom CSV Upload**: Ingest any software metrics CSV with automatic defect target column detection and binarization.
+
+---
+
+## 🧭 Platform Navigation (11 Dedicated Modules)
+
+| # | Module | Key Features |
+|---|---|---|
+| 1 | **⚡ Overview** | Hero KPI counters, research motivation, platform telemetry, quick action launchers, and empirical findings. |
+| 2 | **📁 Dataset Management** | Suite selector (18 benchmarks), custom CSV upload, class distribution donut charts, metric correlation heatmaps, missing value analysis. |
+| 3 | **⚙️ Data Preprocessing** | Imputation (median, mean, mode), duplicate removal, scalers (Standard, MinMax, Robust), train-only SMOTE/ADASYN, zero-leakage guarantee. |
+| 4 | **🤖 Model Training** | Train all 5 classifiers (LR, DT, RF, SVM, GBDT) on full vs optimized feature subsets; radar chart and latency benchmarks. |
+| 5 | **🧬 Optimization Lab** | NSGA-II, Binary PSO, and Genetic Algorithm solvers with real-time animated generation progress and convergence telemetry. |
+| 6 | **🌟 Pareto Analysis** | Dedicated deep dive into 2D/3D non-dominated Pareto surfaces, hypervolume analysis, knee-point trade-offs, and 1-click feature adoption. |
+| 7 | **🎯 Defect Prediction** | Single-module interactive predictor with presets ("Low-Risk", "High-Complexity", "High-Coupling") and batch CSV scoring with 1-click download. |
+| 8 | **🔍 Explainable AI** | Global mean \|SHAP\| feature rankings and local instance waterfall attributions with automated developer refactoring advice. |
+| 9 | **📈 Performance Evaluation** | Multi-model radar spectrum, ROC curves with AUC annotations, PR curves, and interactive 2x2 confusion matrix heatmaps. |
+| 10 | **📜 Experiment History** | SQLite database viewer, search/filter by dataset and model, historical comparison charts, and CSV/JSON export. |
+| 11 | **🛠️ Settings** | Global random seeds, default solver presets, environment telemetry, and session state reset. |
 
 ---
 
 ## 🚀 Quickstart & Installation
 
-### Prerequisites
-- Python 3.10, 3.11, or 3.12
-- Git
-
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/explainable-moo-defect-prediction.git
+git clone https://github.com/prii06132003/explainable-moo-defect-prediction.git
 cd explainable-moo-defect-prediction
 ```
 
-### 2. Create and Activate Virtual Environment
+### 2. Set Up Virtual Environment & Dependencies
 ```bash
-# On Windows
+# Create and activate virtual environment
 python -m venv venv
-.\venv\Scripts\activate
+.\venv\Scripts\activate   # On Windows
+source venv/bin/activate  # On Linux/macOS
 
-# On Linux / macOS
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 4. Run Automated Test Suite
+### 3. Run Automated Unit Tests
 ```bash
 python -m unittest tests/test_all_modules.py
 ```
+*(All 8 test suites pass verifying end-to-end data loading, preprocessing, metaheuristics, models, SHAP, and SQLite persistence).*
 
-### 5. Launch the Streamlit Dashboard
+### 4. Launch the Web Application
 ```bash
+# Option A: 1-Click Batch Launcher (Windows)
+run_app.bat
+
+# Option B: Direct Terminal Launch
 streamlit run app.py
 ```
-Open your browser at `http://localhost:8501`.
+Open **`http://localhost:8501`** in your browser.
 
 ---
 
-## 📊 Streamlit Dashboard Modules
-
-1. **🌐 Overview & Methodology**: Architecture diagram, mathematical optimization formulations, and academic problem statement.
-2. **📁 Dataset Studio**: Interactive dataset selector for PROMISE, AEEEM, ReLink, MORPH, or custom CSV upload, with missing value inspection, class distribution donut charts, and correlation heatmaps.
-3. **⚙️ Preprocessing Studio**: Configurable imputer, scaler (Standard, MinMax, Robust), SMOTE / ADASYN class imbalance resampler, and train/test split with zero-leakage guarantee.
-4. **🧬 Metaheuristic Feature Selection**: Interactive parameter tuning for NSGA-II, GA, and BPSO, with real-time generation progress, convergence curves, and 2D/3D Plotly Pareto front explorers.
-5. **🤖 Model Benchmarking**: Comparative benchmark across all 5 ML models (Accuracy, Precision, Recall, Specificity, F1-Score, ROC-AUC, MCC, latencies), radar charts, and interactive confusion matrices.
-6. **🔍 Explainable AI (SHAP) Studio**: Global mean $|SHAP|$ feature rankings and local instance waterfall attributions with automated software engineering refactoring guidance.
-7. **🎯 Real-Time Defect Predictor**: Single module metric input form with metric archetype presets ("Low-Risk", "High-Complexity", "High-Coupling") and batch CSV bulk scoring with one-click download.
-8. **📜 Experiment History**: SQLite-backed audit log of experimental configurations and comparative performance charts.
+## 📄 Academic Project Documentation
+The complete comprehensive academic research documentation, mathematical formulations, literature review, and experimental results can be found in:
+📖 **[`DOCUMENTATION.md`](DOCUMENTATION.md)**
 
 ---
 
-## 🛠️ Technology Stack
-
-- **Core Language**: Python 3.11
-- **Machine Learning**: Scikit-Learn, Imbalanced-Learn
-- **Metaheuristics**: Custom Vectorized NSGA-II, Genetic Algorithm, Binary PSO, pymoo, DEAP
-- **Explainable AI**: SHAP (SHapley Additive exPlanations)
-- **Interactive UI**: Streamlit, Plotly Express & Graph Objects
-- **Storage & Audit**: SQLite3, Pandas, NumPy
-
----
-
-## 📄 License
+## 📜 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
