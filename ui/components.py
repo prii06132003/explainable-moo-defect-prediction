@@ -274,24 +274,23 @@ def render_metric_card_dark(title: str, value: Any, subtitle: str = ""):
 
 def get_dark_plotly_layout(height: int = 400, title: Optional[str] = None) -> Dict[str, Any]:
     """Generates standardized dark layout dictionary for all Plotly charts."""
-    return dict(
+    layout = dict(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#151E33",
         font=dict(color=COLOR_TEXT, family="Inter, system-ui, sans-serif", size=12),
-        title=dict(text=title, font=dict(color=COLOR_TEXT, size=14, weight="bold")) if title else None,
         margin=dict(t=50 if title else 25, b=35, l=45, r=25),
         height=height,
         xaxis=dict(
             gridcolor=COLOR_BORDER,
             zerolinecolor=COLOR_BORDER,
             tickfont=dict(color=COLOR_MUTED),
-            titlefont=dict(color=COLOR_TEXT)
+            title_font=dict(color=COLOR_TEXT)
         ),
         yaxis=dict(
             gridcolor=COLOR_BORDER,
             zerolinecolor=COLOR_BORDER,
             tickfont=dict(color=COLOR_MUTED),
-            titlefont=dict(color=COLOR_TEXT)
+            title_font=dict(color=COLOR_TEXT)
         ),
         legend=dict(
             font=dict(color=COLOR_TEXT),
@@ -300,6 +299,9 @@ def get_dark_plotly_layout(height: int = 400, title: Optional[str] = None) -> Di
             borderwidth=1
         )
     )
+    if title:
+        layout["title"] = dict(text=f"<b>{title}</b>", font=dict(color=COLOR_TEXT, size=14))
+    return layout
 
 
 def plot_class_distribution_dark(y: pd.Series) -> go.Figure:
@@ -319,9 +321,21 @@ def plot_class_distribution_dark(y: pd.Series) -> go.Figure:
             hoverinfo='label+value+percent'
         )
     ])
-    layout = get_dark_plotly_layout(height=320, title="Module Defect Distribution")
-    layout["showlegend"] = True
-    fig.update_layout(**layout)
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#151E33",
+        font=dict(color=COLOR_TEXT, family="Inter, system-ui, sans-serif", size=12),
+        title=dict(text="<b>Module Defect Distribution</b>", font=dict(color=COLOR_TEXT, size=14)),
+        margin=dict(t=50, b=25, l=25, r=25),
+        height=320,
+        showlegend=True,
+        legend=dict(
+            font=dict(color=COLOR_TEXT),
+            bgcolor="rgba(16, 23, 42, 0.75)",
+            bordercolor=COLOR_BORDER,
+            borderwidth=1
+        )
+    )
     return fig
 
 
@@ -386,7 +400,7 @@ def plot_ga_pso_convergence_dark(history: List[Dict[str, Any]], title: str = "Me
         side="right",
         gridcolor="rgba(0,0,0,0)",
         tickfont=dict(color=COLOR_WARNING),
-        titlefont=dict(color=COLOR_WARNING)
+        title_font=dict(color=COLOR_WARNING)
     )
     fig.update_layout(**layout)
     return fig
@@ -395,6 +409,35 @@ def plot_ga_pso_convergence_dark(history: List[Dict[str, Any]], title: str = "Me
 def plot_pareto_front_2d_dark(pareto_front: List[Dict[str, Any]], knee_solution: Optional[Dict[str, Any]] = None) -> go.Figure:
     """Plots dark 2D Pareto Front: Performance vs Feature Complexity."""
     df_pf = pd.DataFrame(pareto_front)
+    if df_pf.empty:
+        return go.Figure()
+
+    # Defensive column normalization
+    if "feature_ratio" not in df_pf.columns:
+        df_pf["feature_ratio"] = df_pf.get("feature_count", 1) / max(1, df_pf.get("n_features", 10))
+    if "raw_metric" not in df_pf.columns:
+        if "score" in df_pf.columns:
+            df_pf["raw_metric"] = df_pf["score"]
+        elif "predictive_error" in df_pf.columns:
+            df_pf["raw_metric"] = 1.0 - df_pf["predictive_error"]
+        elif "error" in df_pf.columns:
+            df_pf["raw_metric"] = 1.0 - df_pf["error"]
+        else:
+            df_pf["raw_metric"] = 0.8
+    if "eval_latency_sec" not in df_pf.columns:
+        if "latency_ms" in df_pf.columns:
+            df_pf["eval_latency_sec"] = df_pf["latency_ms"] / 1000.0
+        else:
+            df_pf["eval_latency_sec"] = 0.05
+    if "n_selected" not in df_pf.columns:
+        if "selected_features" in df_pf.columns:
+            df_pf["n_selected"] = df_pf["selected_features"].apply(lambda x: len(x) if isinstance(x, list) else 1)
+        elif "features" in df_pf.columns:
+            df_pf["n_selected"] = df_pf["features"].apply(lambda x: len(x) if isinstance(x, list) else 1)
+        elif "feature_count" in df_pf.columns:
+            df_pf["n_selected"] = df_pf["feature_count"]
+        else:
+            df_pf["n_selected"] = 1
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -415,15 +458,17 @@ def plot_pareto_front_2d_dark(pareto_front: List[Dict[str, Any]], knee_solution:
     ))
 
     if knee_solution is not None:
+        kr = knee_solution.get("raw_metric", 1.0 - knee_solution.get("predictive_error", knee_solution.get("error", 0.15)))
+        k_ratio = knee_solution.get("feature_ratio", 0.5)
         fig.add_trace(go.Scatter(
-            x=[knee_solution["feature_ratio"]],
-            y=[knee_solution["raw_metric"]],
+            x=[k_ratio],
+            y=[kr],
             mode="markers+text",
             name="★ Knee-Point Optimal Trade-off",
             marker=dict(size=20, color=COLOR_DANGER, symbol="star", line=dict(color="#FFFFFF", width=1.5)),
             text=["★ Knee Point"],
             textposition="top center",
-            textfont=dict(color="#F87171", size=13, weight="bold")
+            textfont=dict(color="#F87171", size=13)
         ))
 
     layout = get_dark_plotly_layout(height=420, title="NSGA-II 2D Non-Dominated Pareto Frontier")
@@ -438,6 +483,35 @@ def plot_pareto_front_2d_dark(pareto_front: List[Dict[str, Any]], knee_solution:
 def plot_pareto_front_3d_dark(pareto_front: List[Dict[str, Any]], knee_solution: Optional[Dict[str, Any]] = None) -> go.Figure:
     """Plots 3D Pareto Front surface with dark background."""
     df_pf = pd.DataFrame(pareto_front)
+    if df_pf.empty:
+        return go.Figure()
+
+    # Defensive column normalization
+    if "predictive_error" not in df_pf.columns:
+        if "error" in df_pf.columns:
+            df_pf["predictive_error"] = df_pf["error"]
+        elif "raw_metric" in df_pf.columns:
+            df_pf["predictive_error"] = 1.0 - df_pf["raw_metric"]
+        else:
+            df_pf["predictive_error"] = 0.2
+    if "feature_ratio" not in df_pf.columns:
+        df_pf["feature_ratio"] = 0.5
+    if "raw_metric" not in df_pf.columns:
+        df_pf["raw_metric"] = 1.0 - df_pf["predictive_error"]
+    if "eval_latency_sec" not in df_pf.columns:
+        if "latency_ms" in df_pf.columns:
+            df_pf["eval_latency_sec"] = df_pf["latency_ms"] / 1000.0
+        else:
+            df_pf["eval_latency_sec"] = 0.05
+    if "n_selected" not in df_pf.columns:
+        if "selected_features" in df_pf.columns:
+            df_pf["n_selected"] = df_pf["selected_features"].apply(lambda x: len(x) if isinstance(x, list) else 1)
+        elif "features" in df_pf.columns:
+            df_pf["n_selected"] = df_pf["features"].apply(lambda x: len(x) if isinstance(x, list) else 1)
+        elif "feature_count" in df_pf.columns:
+            df_pf["n_selected"] = df_pf["feature_count"]
+        else:
+            df_pf["n_selected"] = 1
 
     fig = go.Figure()
     fig.add_trace(go.Scatter3d(
@@ -458,10 +532,13 @@ def plot_pareto_front_3d_dark(pareto_front: List[Dict[str, Any]], knee_solution:
     ))
 
     if knee_solution is not None:
+        kp_err = knee_solution.get("predictive_error", knee_solution.get("error", 0.15))
+        kp_ratio = knee_solution.get("feature_ratio", 0.5)
+        kp_lat = knee_solution.get("eval_latency_sec", knee_solution.get("latency_ms", 50.0) / 1000.0)
         fig.add_trace(go.Scatter3d(
-            x=[knee_solution["predictive_error"]],
-            y=[knee_solution["feature_ratio"]],
-            z=[knee_solution["eval_latency_sec"]],
+            x=[kp_err],
+            y=[kp_ratio],
+            z=[kp_lat],
             mode="markers+text",
             name="★ Knee Point",
             marker=dict(size=14, color=COLOR_DANGER, symbol="diamond"),
@@ -472,7 +549,7 @@ def plot_pareto_front_3d_dark(pareto_front: List[Dict[str, Any]], knee_solution:
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         font=dict(color=COLOR_TEXT, family="Inter"),
-        title=dict(text="NSGA-II 3D Multi-Objective Optimization Surface", font=dict(color=COLOR_TEXT, size=14, weight="bold")),
+        title=dict(text="<b>NSGA-II 3D Multi-Objective Optimization Surface</b>", font=dict(color=COLOR_TEXT, size=14)),
         scene=dict(
             xaxis=dict(title="f1: Predictive Error (1 - Score)", backgroundcolor=BG_CARD, gridcolor=COLOR_BORDER),
             yaxis=dict(title="f2: Feature Subset Ratio", backgroundcolor=BG_CARD, gridcolor=COLOR_BORDER),
@@ -507,7 +584,7 @@ def plot_model_radar_dark(comparison_df: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         font=dict(color=COLOR_TEXT, family="Inter"),
-        title=dict(text="Multi-Metric Model Evaluation Radar", font=dict(color=COLOR_TEXT, size=14, weight="bold")),
+        title=dict(text="<b>Multi-Metric Model Evaluation Radar</b>", font=dict(color=COLOR_TEXT, size=14)),
         polar=dict(
             radialaxis=dict(visible=True, range=[0, 1.0], gridcolor=COLOR_BORDER, tickfont=dict(color=COLOR_MUTED)),
             angularaxis=dict(gridcolor=COLOR_BORDER, tickfont=dict(color=COLOR_TEXT)),
@@ -548,12 +625,21 @@ def plot_roc_curves_dark(evaluation_results: Dict[str, Dict[str, Any]]) -> go.Fi
     return fig
 
 
-def plot_confusion_matrix_dark(cm_dict: Dict[str, int], model_name: str = "Classifier") -> go.Figure:
+def plot_confusion_matrix_dark(cm_data: Any, model_name: str = "Classifier") -> go.Figure:
     """Plots interactive 2x2 confusion matrix styled with purple gradients."""
-    tp = cm_dict.get("tp", 0)
-    fp = cm_dict.get("fp", 0)
-    fn = cm_dict.get("fn", 0)
-    tn = cm_dict.get("tn", 0)
+    if isinstance(cm_data, dict):
+        tp = cm_data.get("tp", 0)
+        fp = cm_data.get("fp", 0)
+        fn = cm_data.get("fn", 0)
+        tn = cm_data.get("tn", 0)
+    elif hasattr(cm_data, "shape") and cm_data.shape == (2, 2):
+        tn, fp = int(cm_data[0, 0]), int(cm_data[0, 1])
+        fn, tp = int(cm_data[1, 0]), int(cm_data[1, 1])
+    elif isinstance(cm_data, (list, tuple)) and len(cm_data) == 2:
+        tn, fp = int(cm_data[0][0]), int(cm_data[0][1])
+        fn, tp = int(cm_data[1][0]), int(cm_data[1][1])
+    else:
+        tn, fp, fn, tp = 0, 0, 0, 0
 
     z = [[tn, fp], [fn, tp]]
     text = [
@@ -637,18 +723,30 @@ def plot_shap_local_waterfall_dark(local_res: Dict[str, Any], max_display: int =
 def plot_latency_comparison_dark(comparison_df: pd.DataFrame) -> go.Figure:
     """Plots execution latency comparison between models."""
     fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=comparison_df["Model"],
-        y=comparison_df["Train Time (s)"],
-        name="Training Latency (s)",
-        marker_color=COLOR_PRIMARY
-    ))
-    fig.add_trace(go.Bar(
-        x=comparison_df["Model"],
-        y=comparison_df["Inference (s)"] * 1000,
-        name="Inference Latency (ms)",
-        marker_color=COLOR_SECONDARY
-    ))
+    train_col = "Train Time (s)" if "Train Time (s)" in comparison_df.columns else ("Train Latency (s)" if "Train Latency (s)" in comparison_df.columns else None)
+    infer_col = "Inference (s)" if "Inference (s)" in comparison_df.columns else ("Inference Latency (s)" if "Inference Latency (s)" in comparison_df.columns else None)
+
+    if train_col:
+        fig.add_trace(go.Bar(
+            x=comparison_df["Model"],
+            y=comparison_df[train_col],
+            name="Training Latency (s)",
+            marker_color=COLOR_PRIMARY
+        ))
+    if infer_col:
+        fig.add_trace(go.Bar(
+            x=comparison_df["Model"],
+            y=comparison_df[infer_col] * 1000,
+            name="Inference Latency (ms)",
+            marker_color=COLOR_SECONDARY
+        ))
+    elif "Latency (ms)" in comparison_df.columns:
+        fig.add_trace(go.Bar(
+            x=comparison_df["Model"],
+            y=comparison_df["Latency (ms)"],
+            name="Inference Latency (ms)",
+            marker_color=COLOR_SECONDARY
+        ))
 
     layout = get_dark_plotly_layout(height=360, title="Computational Efficiency & Latency Benchmark")
     layout["yaxis"]["title"] = "Latency (seconds / milliseconds)"
