@@ -65,7 +65,9 @@ class ParticleSwarmFeatureSelector:
         self.rng = np.random.RandomState(random_state)
         self.gbest_position: Optional[np.ndarray] = None
         self.gbest_fitness: float = -1.0
+        self.best_fitness: float = -1.0
         self.gbest_metric_score: float = 0.0
+        self.best_metric_score: float = 0.0
         self.best_selected_features: List[str] = []
         self.history: List[Dict[str, Any]] = []
 
@@ -208,7 +210,9 @@ class ParticleSwarmFeatureSelector:
                     # Update global best
                     if fit_val > self.gbest_fitness:
                         self.gbest_fitness = fit_val
+                        self.best_fitness = fit_val
                         self.gbest_metric_score = metric_val
+                        self.best_metric_score = metric_val
                         self.gbest_position = positions[i].copy()
                         self.best_selected_features = [
                             feature_names[j] for j in range(n_features) if self.gbest_position[j] == 1

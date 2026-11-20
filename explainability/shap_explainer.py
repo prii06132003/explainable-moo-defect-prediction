@@ -119,16 +119,25 @@ class ShapExplainerEngine:
             "feature_names": self.feature_names
         }
 
-    def explain_local_instance(self, instance_df: pd.DataFrame) -> Dict[str, Any]:
+    def explain_local_instance(self, instance_df: Any) -> Dict[str, Any]:
         """
         Decomposes individual prediction into additive SHAP feature contributions (Waterfall).
         Generates actionable software engineering refactoring advice.
+        Supports pd.Series, single-row pd.DataFrame, or multi-row DataFrame (uses first row).
         """
-        if len(instance_df) != 1:
-            instance_df = instance_df.iloc[[0]]
+        if isinstance(instance_df, pd.Series):
+            df_inst = instance_df.to_frame().T
+        elif isinstance(instance_df, pd.DataFrame):
+            df_inst = instance_df.iloc[[0]].copy()
+        else:
+            df_inst = pd.DataFrame([instance_df])
 
-        # Ensure correct column ordering
-        aligned_df = instance_df[self.feature_names]
+        # Ensure correct column ordering and handle missing columns safely
+        for col in self.feature_names:
+            if col not in df_inst.columns:
+                df_inst[col] = 0.0
+
+        aligned_df = df_inst[self.feature_names]
 
         shap_values = self._get_shap_values(aligned_df)
 

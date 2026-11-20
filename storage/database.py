@@ -113,6 +113,10 @@ class ExperimentDatabase:
             df = pd.read_sql_query(query, conn)
             return df
 
+    def get_experiment_history(self) -> pd.DataFrame:
+        """Alias for get_all_experiments."""
+        return self.get_all_experiments()
+
     def clear_all(self) -> None:
         """Deletes all experiment records from the database."""
         with self._get_connection() as conn:

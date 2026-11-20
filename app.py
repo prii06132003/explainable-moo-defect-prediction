@@ -973,16 +973,28 @@ elif st.session_state.nav_target == "Explainable AI":
         X_tr = st.session_state.X_train[active_feats]
         X_te = st.session_state.X_test[active_feats]
 
-        with st.spinner(f"Computing SHAP explanations for {selected_model_name}..."):
-            explainer_engine = ShapExplainerEngine(clf, X_tr, model_name=selected_model_name)
-            st.session_state.explainer_engine = explainer_engine
+        need_recalc = (
+            "current_explained_model" not in st.session_state
+            or st.session_state.current_explained_model != selected_model_name
+            or "cached_global_shap" not in st.session_state
+            or st.session_state.explainer_engine is None
+        )
+
+        if need_recalc:
+            with st.spinner(f"Initializing SHAP Explainer and computing global metrics for {selected_model_name}..."):
+                explainer_engine = ShapExplainerEngine(clf, X_tr, model_name=selected_model_name)
+                st.session_state.explainer_engine = explainer_engine
+                st.session_state.current_explained_model = selected_model_name
+                st.session_state.cached_global_shap = explainer_engine.compute_global_importance(X_te, max_eval_samples=60)
+        else:
+            explainer_engine = st.session_state.explainer_engine
+
+        global_res = st.session_state.cached_global_shap
 
         tab_glob, tab_loc = st.tabs(["🌍 Global Feature Attribution", "🔬 Local Module Diagnosis & Refactoring Rules"])
 
         with tab_glob:
             st.markdown("#### Global Metric Impact Ranking")
-            with st.spinner("Calculating global SHAP attributions..."):
-                global_res = explainer_engine.compute_global_importance(X_te, max_eval_samples=100)
 
             fig_bar = plot_shap_global_bar_dark(global_res["feature_importance_ranking"], top_k=15)
             st.plotly_chart(fig_bar, use_container_width=True)
